@@ -25,7 +25,7 @@ if args.ifor == None:
     image_format = 'jpg'
 
 
-# Set workdir if specified to save the images
+# Set workdir if the target folder is specified to save the images
 if target_folder is not None:
     if not os.path.isdir(target_folder):
         os.makedirs(target_folder)
