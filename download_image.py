@@ -27,20 +27,10 @@ target_folder = args.tf
 # Set default image format to jpg
 if args.ifor == None:
     image_format = 'jpg'
- 
-    
+
 # Set pages if not specified and the task is downloading multiple images
 if args.p == None and main_image_url[-1] == "/":
     pages = page_end - page_start
-
-
-# Set workdir if the target folder is specified to save the images
-if target_folder is not None:
-    if not os.path.isdir(target_folder):
-        os.mkdir(target_folder)
-    if os.getcwd() != target_folder:
-        os.chdir(target_folder)
-    print("Working Directory:", target_folder)
 
 
 # Function to download image/images
@@ -65,7 +55,14 @@ def download_image(pages_range):
 
 
 if __name__ == '__main__':
-    print("Test", multiprocessing.current_process())
+    # Set workdir if the target folder is specified to save the images
+    if target_folder is not None:
+        if not os.path.isdir(target_folder):
+            os.mkdir(target_folder)
+        os.chdir(target_folder)
+        print("Working Directory:", target_folder)
+        
+    # Main task
     if pages is not None:
         # If the number of pages is more than one then distribute the process
         # Multiprocessing things
