@@ -13,6 +13,7 @@ parser.add_argument('--ps', type=int, help='Page start')
 parser.add_argument('--pe', type=int, help='Page end')
 parser.add_argument('--ifor', type=str, help='Image format (jpg/png/jpeg/etc). Default: jpg')
 parser.add_argument('--tf', type=str, help='Specify folder in which the downloaded image will be saved to. Default: current working directory')
+parser.add_argument('--force', type=str, help="Specify whether to overwrite the image if it's already exists or not in the current working directory. If you want to force then the options are either string of: true, 1, or yes")
 
 args = parser.parse_args()
 
@@ -32,24 +33,44 @@ if args.ifor == None:
 if args.p == None and main_image_url[-1] == "/":
     pages = page_end - page_start
 
+# Set force/overwrite argument
+if str(args.force).lower() in ["true", "1", "yes"]:
+    force = True
+else:
+    force = False
 
 # Function to download image/images
 def download_image(pages_range):
     if pages_range is not None:
         assert type(pages_range) is list
         for page in pages_range:
+            filename = f'{page}'.zfill(3)+f'.{image_format}'
             image_url = main_image_url+f'{page}.{image_format}'
-            print('Downloading image from: ', image_url)
+            
+            # check whether the file is already exists or not
+            if not force:
+                if os.path.exists(filename):
+                    print("Image", filename, "already exists. Skip downloading from", image_url, f"({multiprocessing.current_process().name})")
+                    continue
+            
+            print(multiprocessing.current_process().name, '- downloading image from:', image_url)
             img_data = requests.get(image_url).content
 
-            with open(f'{page}'.zfill(3)+f'.{image_format}', 'wb') as handler:
+            with open(filename, 'wb') as handler:
                 handler.write(img_data)
     else:
         # if the image is just one and then the image format is specified from the url
         image_url = main_image_url
-        print('Downloading image from: ', image_url)
-        img_data = requests.get(image_url).content
         filename = image_url.split('/')[-1]
+        
+        # check whether the file is already exists or not
+        if not force:
+            if os.path.exists(filename): # note: zfill deliberately not specified
+                print("Image", filename, "already exists. Skip downloading from", image_url)
+                return
+            
+        print('Downloading image from:', image_url)
+        img_data = requests.get(image_url).content
         with open(f'{filename}', 'wb') as handler:
             handler.write(img_data)
 
